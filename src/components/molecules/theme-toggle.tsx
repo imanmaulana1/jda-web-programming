@@ -4,7 +4,6 @@ import { MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Toggle } from "@/components/ui/toggle";
 
 export const ThemeToggle = () => {
@@ -15,7 +14,19 @@ export const ThemeToggle = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return <Skeleton className="size-9" />;
+  if (!mounted)
+    return (
+      <Toggle
+        pressed={false}
+        disabled
+        className="size-9"
+        aria-label="Loading theme toggle"
+      >
+        <div className="animate-spin">
+          <SunIcon size={16} className="opacity-50" />
+        </div>
+      </Toggle>
+    );
 
   const isDarkmode = resolvedTheme === "dark";
 
