@@ -1,13 +1,6 @@
-export interface Event {
-  slug: string;
-  title: string;
-  organizer: string;
-  date: string;
-  time: string;
-  description: string;
-}
+import { EventDto } from "@/types/event.type";
 
-export const EVENTS_DATA = [
+let events = [
   {
     slug: "react-fundamentals-workshop",
     title: "React Fundamentals Workshop",
@@ -70,3 +63,32 @@ export const EVENTS_DATA = [
     description: "Ensure your web applications are accessible to all users.",
   },
 ];
+
+export const getEvents = () => events;
+
+export const addEvent = (event: EventDto) => {
+  events.push(event);
+};
+
+export const deleteEventBySlug = (slug: string) => {
+  events = events.filter((e) => e.slug !== slug);
+};
+
+export const getEventBySlug = (slug: string) => {
+  return events.find((e) => e.slug === slug);
+};
+
+export const updateEventBySlug = (
+  updatedData: Partial<EventDto>,
+  slug: string,
+) => {
+  const index = events.findIndex((e) => e.slug === slug);
+  if (index === -1) return false;
+
+  events[index] = {
+    ...events[index],
+    ...updatedData,
+  };
+
+  return events[index];
+};
