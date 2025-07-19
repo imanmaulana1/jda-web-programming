@@ -1,12 +1,8 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import {
-  deleteEventBySlug,
-  getEventBySlug,
-  updateEventBySlug,
-} from "@/lib/data";
+import prisma from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
-import { EventDto } from "@/types/event.type";
+import { Event } from "@/types/event.type";
 
 export async function GET(
   request: NextRequest,
@@ -14,35 +10,40 @@ export async function GET(
 ) {
   const slug = (await params).slug;
 
-  const result = getEventBySlug(slug);
-
-  if (!result) {
-    return new Response(JSON.stringify({ message: "Event not found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json" },
+  try {
+    const event = await prisma.event.findUnique({
+      where: {
+        slug,
+      },
     });
-  }
 
-  return new Response(JSON.stringify(result), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+    if (!event)
+      return NextResponse.json({ error: `Event not found` }, { status: 404 });
+
+    return NextResponse.json(event, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: `Failed to fetch events: ${error}` },
+      { status: 500 },
+    );
+  }
 }
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const body = (await request.json()) as EventDto;
+  const body = (await request.json()) as Omit<Event, "id">;
   const slug = (await params).slug;
 
-  const result = getEventBySlug(slug);
+  const result = await prisma.event.findUnique({
+    where: {
+      slug,
+    },
+  });
 
   if (!result) {
-    return new Response(JSON.stringify({ message: "Event not found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: `Event not found` }, { status: 404 });
   }
 
   const updateSlug = slugify(body.title);
@@ -52,12 +53,14 @@ export async function PUT(
     slug: updateSlug,
   };
 
-  const updated = updateEventBySlug(payload, slug);
-
-  return new Response(JSON.stringify(updated), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
+  const updated = await prisma.event.update({
+    where: {
+      slug,
+    },
+    data: payload,
   });
+
+  return NextResponse.json(updated, { status: 200 });
 }
 
 export async function DELETE(
@@ -66,7 +69,21 @@ export async function DELETE(
 ) {
   const slug = (await params).slug;
 
-  deleteEventBySlug(slug);
+  const isExist = await prisma.event.findUnique({
+    where: {
+      slug,
+    },
+  });
 
-  return new Response(null, { status: 204 });
+  if (!isExist) {
+    return new Response("Event not found", { status: 404 });
+  }
+
+  await prisma.event.delete({
+    where: {
+      slug,
+    },
+  });
+
+  return new NextResponse(null, { status: 204 });
 }

@@ -6,24 +6,21 @@ import { useEffect, useState } from "react";
 import { EventCard } from "@/components/molecules/event-card";
 import { EventCardSkeleton } from "@/components/molecules/event-card-skeleton";
 import { deleteEvent, getEvent } from "@/lib/api/event";
-import { Event } from "@/lib/constants";
-
-import EditEvent from "./edit-event";
+import { Event } from "@/types/event.type";
 
 interface DetailEventProps {
   slug: string;
 }
 
 function DetailEvent({ slug }: DetailEventProps) {
-  const [event, setEvent] = useState<Event | null>(null);
-  const [isEdit, setIsEdit] = useState(false);
+  const [data, setData] = useState<Event | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getEvent(slug);
-        setEvent(data);
+        setData(data);
       } catch (error) {
         console.error(error);
       }
@@ -31,11 +28,6 @@ function DetailEvent({ slug }: DetailEventProps) {
 
     fetchData();
   }, [slug]);
-
-  const handleUpdate = async (slug: string) => {
-    setIsEdit(true);
-    console.log(slug);
-  };
 
   const handleDelete = async (slug: string) => {
     try {
@@ -48,17 +40,11 @@ function DetailEvent({ slug }: DetailEventProps) {
     }
   };
 
-  if (!event) return <EventCardSkeleton />;
+  if (!data) return <EventCardSkeleton />;
 
   return (
     <div className="space-y-10">
-      <EventCard
-        action={true}
-        {...event}
-        onUpdate={handleUpdate}
-        onDelete={handleDelete}
-      />
-      {isEdit && <EditEvent defaultValues={event} onEdit={setIsEdit} />}
+      <EventCard action={true} onDelete={handleDelete} {...data} />
     </div>
   );
 }

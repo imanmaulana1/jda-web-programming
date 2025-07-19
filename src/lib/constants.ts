@@ -1,11 +1,4 @@
-export interface Event {
-  slug: string;
-  title: string;
-  organizer: string;
-  date: string;
-  time: string;
-  description: string;
-}
+
 
 export const EVENTS_DATA = [
   {

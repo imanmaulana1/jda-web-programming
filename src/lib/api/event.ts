@@ -1,6 +1,6 @@
-import { EventDto } from "@/types/event.type";
+import { Event } from "@/types/event.type";
 
-export const getEvents = async (limit = 0) => {
+export const getEvents = async (limit = 0): Promise<Event[]> => {
   try {
     const res = await fetch(`http://localhost:3000/api/events?limit=${limit}`);
 
@@ -8,13 +8,16 @@ export const getEvents = async (limit = 0) => {
       throw new Error(`Response status: ${res.status}`);
     }
 
-    return await res.json();
+    const data = await res.json();
+
+    return data;
   } catch (error) {
     console.error(error);
+    throw error;
   }
 };
 
-export const getEvent = async (slug: string) => {
+export const getEvent = async (slug: string): Promise<Event> => {
   try {
     const res = await fetch(`http://localhost:3000/api/events/${slug}`);
 
@@ -25,10 +28,11 @@ export const getEvent = async (slug: string) => {
     return await res.json();
   } catch (error) {
     console.error(error);
+    throw error;
   }
 };
 
-export const createEvent = async (event: EventDto) => {
+export const createEvent = async (event: Omit<Event, "id">) => {
   try {
     const res = await fetch(`http://localhost:3000/api/events`, {
       method: "POST",
@@ -48,7 +52,7 @@ export const createEvent = async (event: EventDto) => {
   }
 };
 
-export const updateEvent = async (event: EventDto, slug: string) => {
+export const updateEvent = async (event: Event, slug: string) => {
   try {
     const res = await fetch(`http://localhost:3000/api/events/${slug}`, {
       method: "PUT",

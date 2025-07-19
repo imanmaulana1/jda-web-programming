@@ -9,15 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Event } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
+import { Event } from "@/types/event.type";
 
 export const EventCard = ({
   slug,
   title,
   organizer,
   date,
-  time,
+  start_time,
+  end_time,
   description,
   action = false,
   onUpdate,
@@ -59,8 +60,8 @@ export const EventCard = ({
         <p>{description}</p>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <time>{time}</time>
-        <time>{date}</time>
+        <time>{`${start_time} - ${end_time}`}</time>
+        <time>{formatDate(date ? date.toString() : undefined)}</time>
       </CardFooter>
     </Card>
   );

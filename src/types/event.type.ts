@@ -1,8 +1,10 @@
-export interface EventDto {
+export interface Event {
+  id: string;
   slug: string;
   title: string;
   organizer: string;
   date: string;
-  time: string;
+  start_time: string;
+  end_time: string;
   description: string;
 }
