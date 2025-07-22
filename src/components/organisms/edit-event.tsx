@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
@@ -8,21 +9,28 @@ import { TextareaField } from "@/components/molecules/textarea-field";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { updateEvent } from "@/lib/api/event";
+import { slugify } from "@/lib/utils";
 import { EventFormData } from "@/schemas/event.schema";
-import { useEventStore } from "@/stores/event.store";
-import { EventDto } from "@/types/event.type";
+import { Event } from "@/types/event.type";
+
+import DateField from "../molecules/date-field";
 
 interface EditEventProps {
-  defaultValues: EventDto;
+  defaultValues: Omit<Event, "id">;
   onEdit: (value: boolean) => void;
 }
 
-function EditEvent({ defaultValues, onEdit }: EditEventProps) {
+export function EditEvent({ defaultValues, onEdit }: EditEventProps) {
   const form = useForm<EventFormData>({
-    defaultValues,
+    defaultValues: {
+      title: defaultValues.title,
+      organizer: defaultValues.organizer,
+      start_time: defaultValues.start_time,
+      end_time: defaultValues.end_time,
+      date: new Date(defaultValues.date),
+      description: defaultValues.description,
+    },
   });
-
-  const updateEventStore = useEventStore((state) => state.updateEvent);
 
   const router = useRouter();
 
@@ -30,12 +38,12 @@ function EditEvent({ defaultValues, onEdit }: EditEventProps) {
     const slug = defaultValues.slug;
     const payload = {
       ...data,
-      slug,
+      slug: slugify(data.title),
+      date: format(data.date, "yyyy-MM-dd"),
     };
 
     try {
       const res = await updateEvent(payload, slug);
-      updateEventStore(res, defaultValues.slug);
       router.replace("/events/" + res.slug);
       onEdit(false);
       form.reset();
@@ -59,19 +67,23 @@ function EditEvent({ defaultValues, onEdit }: EditEventProps) {
           label="Organizer"
           placeholder="Enter organizer name"
         />
-
-        <TextField
-          control={form.control}
-          name="time"
-          label="Time"
-          placeholder="Enter time of event"
-        />
-        <TextField
-          control={form.control}
-          name="date"
-          label="Date"
-          placeholder="Enter date of event"
-        />
+        <div className="flex items-center gap-4">
+          <TextField
+            control={form.control}
+            name="start_time"
+            type="time"
+            label="Start Time"
+            placeholder="Enter start time of event"
+          />
+          <TextField
+            control={form.control}
+            name="end_time"
+            type="time"
+            label="End Time"
+            placeholder="Enter end time of event"
+          />
+        </div>
+        <DateField form={form} />
         <TextareaField
           control={form.control}
           name="description"
@@ -85,5 +97,3 @@ function EditEvent({ defaultValues, onEdit }: EditEventProps) {
     </Form>
   );
 }
-
-export default EditEvent;

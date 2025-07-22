@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
-import { slugify } from "@/lib/utils";
 import { Event } from "@/types/event.type";
 
 export async function GET(
@@ -46,20 +45,30 @@ export async function PUT(
     return NextResponse.json({ error: `Event not found` }, { status: 404 });
   }
 
-  const updateSlug = slugify(body.title);
-
-  const payload = {
+  const formattedEvent = {
     ...body,
-    slug: updateSlug,
+    date: new Date(body.date),
   };
+
+  const existingEvent = await prisma.event.findUnique({
+    where: {
+      slug: body.slug,
+    },
+  });
+
+  if (existingEvent) {
+    return NextResponse.json(
+      { error: `Event with slug ${body.slug} already exists` },
+      { status: 400 },
+    );
+  }
 
   const updated = await prisma.event.update({
     where: {
       slug,
     },
-    data: payload,
+    data: formattedEvent,
   });
-
   return NextResponse.json(updated, { status: 200 });
 }
 

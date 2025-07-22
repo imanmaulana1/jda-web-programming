@@ -52,7 +52,7 @@ export const createEvent = async (event: Omit<Event, "id">) => {
   }
 };
 
-export const updateEvent = async (event: Event, slug: string) => {
+export const updateEvent = async (event: Omit<Event, "id">, slug: string) => {
   try {
     const res = await fetch(`http://localhost:3000/api/events/${slug}`, {
       method: "PUT",

@@ -1,4 +1,9 @@
+"use client";
+
+import { Provider } from "react-redux";
+
 import { MainHeader } from "@/components/organisms/main-header";
+import { store } from "@/stores/store";
 
 export default function LandingLayout({
   children,
@@ -7,8 +12,10 @@ export default function LandingLayout({
 }) {
   return (
     <>
-      <MainHeader />
-      {children}
+      <Provider store={store}>
+        <MainHeader />
+        {children}
+      </Provider>
     </>
   );
 }

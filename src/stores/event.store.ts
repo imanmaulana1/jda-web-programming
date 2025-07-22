@@ -1,6 +1,15 @@
 import { create } from "zustand";
 
-import { Event } from "@/lib/constants";
+interface Event {
+  id: string;
+  slug: string;
+  title: string;
+  organizer: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  description: string;
+}
 
 interface EventState {
   events: Event[] | [];
